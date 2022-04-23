@@ -1,5 +1,6 @@
 package com.mendel.mendelchallenge.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import com.mendel.mendelchallenge.domain.Transaction;
@@ -21,4 +22,24 @@ public interface TransactionRepository {
      * value.
      */
     Optional<Transaction> getTransactionById(Long theId);
+
+    /**
+     * Retrieves a list with related transactions.
+     *
+     * @param theId the id cannot be null.
+     *
+     * @return a list with the related transactions. Cannot be null, but can
+     * be empty.
+     */
+    List<Transaction> getTransactionsByParentId(Long theId);
+
+    /**
+     * Retrieves a transactions by type
+     *
+     * @param theType the type cannot be null or empty.
+     *
+     * @return a list with the transactions. Cannot be null, but can
+     * be empty.
+     */
+    List<Transaction> getTransactionsByType(String theType);
 }

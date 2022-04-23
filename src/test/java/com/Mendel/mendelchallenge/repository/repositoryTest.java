@@ -3,6 +3,8 @@ package com.Mendel.mendelchallenge.repository;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
+
 import com.mendel.mendelchallenge.domain.ErrorCode;
 import com.mendel.mendelchallenge.domain.Transaction;
 import com.mendel.mendelchallenge.exception.ParentIdNotFoundException;
@@ -39,7 +41,7 @@ public class repositoryTest {
         Assert.assertTrue(target.getTransactionById(id).isPresent());
     }
 
-    @Test(expected = AssertionError.class)
+    @Test(expected = IllegalArgumentException.class)
     public void when_saveTransactionWithIdNull_then_throwException() {
         Long id = null;
 
@@ -49,7 +51,7 @@ public class repositoryTest {
         target.save(mockTransaction);
     }
 
-    @Test(expected = AssertionError.class)
+    @Test(expected = IllegalArgumentException.class)
     public void when_saveTransactionWithTypeNull_then_throwException() {
         Long id = 1L;
         String type = null;
@@ -77,5 +79,92 @@ public class repositoryTest {
         when(mockTransaction.getParent_id()).thenReturn(parentId);
 
         target.save(mockTransaction);
+    }
+
+    @Test()
+    public void when_getTransactionByParentId_then_success() {
+
+        Transaction tx1 = Transaction.builder()
+          .id(1L)
+          .type("test")
+          .parent_id(null)
+          .build();
+        Transaction tx2 = Transaction.builder()
+          .id(10L)
+          .type("test")
+          .parent_id(1l)
+          .build();
+        Transaction tx3 = Transaction.builder()
+          .id(15L)
+          .type("test")
+          .parent_id(1l)
+          .build();
+
+        target.save(tx1);
+        target.save(tx2);
+        target.save(tx3);
+
+        List<Transaction> result =
+          target.getTransactionsByParentId(tx1.getId());
+
+        Assert.assertNotNull(result);
+        Assert.assertFalse(result.isEmpty());
+    }
+
+    @Test()
+    public void when_notExistRelatedTransaction_then_returnEmptyList() {
+
+        Transaction tx1 = Transaction.builder()
+          .id(1L)
+          .type("test")
+          .parent_id(null)
+          .build();
+        Transaction tx2 = Transaction.builder()
+          .id(10L)
+          .type("test")
+          .parent_id(null)
+          .build();
+        Transaction tx3 = Transaction.builder()
+          .id(15L)
+          .type("test")
+          .parent_id(null)
+          .build();
+
+        target.save(tx1);
+        target.save(tx2);
+        target.save(tx3);
+
+        List<Transaction> result =
+          target.getTransactionsByParentId(tx1.getId());
+
+        Assert.assertNotNull(result);
+        Assert.assertTrue(result.isEmpty());
+    }
+
+    @Test()
+    public void when_getTransactionByType_then_success() {
+        String type = "test";
+        Transaction tx1 = Transaction.builder()
+          .id(1L)
+          .type(type)
+          .build();
+        Transaction tx2 = Transaction.builder()
+          .id(10L)
+          .type(type)
+          .build();
+        Transaction tx3 = Transaction.builder()
+          .id(15L)
+          .type(type)
+          .build();
+
+        target.save(tx1);
+        target.save(tx2);
+        target.save(tx3);
+
+        List<Transaction> result =
+          target.getTransactionsByType("test");
+
+        Assert.assertNotNull(result);
+        Assert.assertTrue(result.stream().allMatch(x->x.getType().equals(type)));
     }
 }
