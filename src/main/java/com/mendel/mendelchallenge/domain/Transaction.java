@@ -1,12 +1,10 @@
 package com.mendel.mendelchallenge.domain;
 
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.util.Assert;
 
 @Getter
-@Builder
 @NoArgsConstructor
 /**
  * The transaction entity.
