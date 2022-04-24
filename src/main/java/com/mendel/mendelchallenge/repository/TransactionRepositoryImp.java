@@ -26,10 +26,10 @@ public class TransactionRepositoryImp implements TransactionRepository {
     public void save(Transaction theTransaction) {
         Assert.notNull(theTransaction, ErrorCode.TRANSACTION_NULL.getErrorMessage());
         Assert.notNull(theTransaction.getId(), ErrorCode.TRANSACTION_ID_NULL.getErrorMessage());
-        Assert.hasLength(theTransaction.getType(), ErrorCode.TRANSACTION_TYPE_NULL.getErrorMessage());
+        Assert.hasLength(theTransaction.getType(), ErrorCode.TRANSACTION_TYPE_NULL_OR_EMPTY.getErrorMessage());
 
-        if (theTransaction.getParent_id() != null &&
-          !getTransactionById(theTransaction.getParent_id()).isPresent()) {
+        if (theTransaction.getParentId() != null &&
+          !getTransactionById(theTransaction.getParentId()).isPresent()) {
             throw new ParentIdNotFoundException(
               ErrorCode.PARENT_ID_NOT_FOUND.getErrorMessage());
         }
@@ -54,7 +54,7 @@ public class TransactionRepositoryImp implements TransactionRepository {
     public List<Transaction> getTransactionsByParentId(final Long theId) {
         Assert.notNull(theId, ErrorCode.TRANSACTION_ID_NULL.getErrorMessage());
         return transactions.stream()
-          .filter(x -> x.getParent_id() == theId)
+          .filter(x -> x.getParentId() == theId)
           .collect(Collectors.toList());
     }
     /**
@@ -62,7 +62,7 @@ public class TransactionRepositoryImp implements TransactionRepository {
      */
     @Override
     public List<Transaction> getTransactionsByType(final String theType) {
-        Assert.hasLength(theType, ErrorCode.TRANSACTION_TYPE_NULL.getErrorMessage());
+        Assert.hasLength(theType, ErrorCode.TRANSACTION_TYPE_NULL_OR_EMPTY.getErrorMessage());
         return transactions.stream()
           .filter(x -> x.getType() == theType)
           .collect(Collectors.toList());

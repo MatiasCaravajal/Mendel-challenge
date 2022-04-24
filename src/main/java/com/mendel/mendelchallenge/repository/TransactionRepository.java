@@ -2,12 +2,11 @@ package com.mendel.mendelchallenge.repository;
 
 import java.util.List;
 import java.util.Optional;
-
 import com.mendel.mendelchallenge.domain.Transaction;
 
 public interface TransactionRepository {
     /**
-     * Save transaction.
+     * Save a transaction.
      *
      * @param theTransaction cannot be null.
      */

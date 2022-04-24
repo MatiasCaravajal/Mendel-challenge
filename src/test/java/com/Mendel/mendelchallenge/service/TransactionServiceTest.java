@@ -1,0 +1,121 @@
+package com.Mendel.mendelchallenge.service;
+
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.List;
+import java.util.Optional;
+
+import com.mendel.mendelchallenge.controller.dto.TransactionDto;
+import com.mendel.mendelchallenge.domain.Transaction;
+import com.mendel.mendelchallenge.repository.TransactionRepositoryImp;
+import com.mendel.mendelchallenge.service.TransactionService;
+import org.junit.Assert;
+import org.junit.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+
+@SpringBootTest
+public class TransactionServiceTest {
+    TransactionRepositoryImp repository = mock(TransactionRepositoryImp.class);
+    TransactionService target = new TransactionService(repository);
+
+    TransactionDto dto = mock(TransactionDto.class);
+    Transaction entity = mock(Transaction.class);
+
+    @Test
+    public void when_saveTransaction_then_success() {
+        when(dto.create()).thenReturn(entity);
+        doNothing().when(repository).save(entity);
+
+        target.save(dto);
+        verify(repository, times(1)).save(entity);
+    }
+
+    @Test
+    public void when_GetTransactionIdsByType_then_returnList() {
+        String type = "Test";
+        Transaction tx1 = Transaction.builder()
+          .id(1L)
+          .type(type)
+          .parentId(null)
+          .build();
+        Transaction tx2 = Transaction.builder()
+          .id(10L)
+          .type(type)
+          .parentId(1l)
+          .build();
+
+        when(repository.getTransactionsByType(type)).thenReturn(List.of(tx1, tx2));
+
+        List<Long> result = target.getTransactionIdsByType(type);
+        verify(repository, times(1)).getTransactionsByType(type);
+        Assert.assertEquals(result, List.of(tx1.getId(), tx2.getId()));
+    }
+
+    @Test
+    public void when_sumRelatedTransaction_then_returnDouble() {
+        String type = "Test";
+        long id = 1l;
+        Transaction tx1 = Transaction.builder()
+          .id(id)
+          .type(type)
+          .amount(1000)
+          .parentId(null)
+          .build();
+        Transaction tx2 = Transaction.builder()
+          .id(10L)
+          .type(type)
+          .amount(5000)
+          .parentId(id)
+          .build();
+        Transaction tx3 = Transaction.builder()
+          .id(10L)
+          .type(type)
+          .amount(500)
+          .parentId(id)
+          .build();
+        Transaction tx4 = Transaction.builder()
+          .id(10L)
+          .type(type)
+          .amount(2000)
+          .parentId(id)
+          .build();
+
+        when(repository.getTransactionById(id)).thenReturn(Optional.of(tx1));
+        when(repository.getTransactionsByParentId(id)).thenReturn(List.of(tx2, tx3, tx4));
+
+        double result = target.getSumRelatedTransactions(id);
+        double total = tx1.getAmount() + tx2.getAmount() + tx3.getAmount()+ tx4.getAmount();
+
+        verify(repository, times(1)).getTransactionById(id);
+        verify(repository, times(1)).getTransactionsByParentId(id);
+
+        Assert.assertTrue(result == total);
+    }
+
+    @Test
+    public void when_sumRelatedTransactionWithoutParent_then_returnDouble() {
+        String type = "Test";
+        long id = 1l;
+        Transaction tx1 = Transaction.builder()
+          .id(id)
+          .type(type)
+          .amount(1000)
+          .parentId(null)
+          .build();
+
+        when(repository.getTransactionById(id)).thenReturn(Optional.of(tx1));
+        when(repository.getTransactionsByParentId(id)).thenReturn(List.of());
+
+        double result = target.getSumRelatedTransactions(id);
+
+        verify(repository, times(1)).getTransactionById(id);
+        verify(repository, times(1)).getTransactionsByParentId(id);
+
+        Assert.assertTrue(result == tx1.getAmount());
+    }
+
+}

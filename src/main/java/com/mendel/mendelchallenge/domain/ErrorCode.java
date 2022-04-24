@@ -1,12 +1,14 @@
 package com.mendel.mendelchallenge.domain;
 
-import java.util.Locale;
-
+/**
+ * The error codes.
+ */
 public enum ErrorCode {
 
   TRANSACTION_ID_NULL("The transaction id cannot be null."),
   TRANSACTION_NULL("The transaction cannot be null."),
-  TRANSACTION_TYPE_NULL("The transaction cannot be null."),
+  TRANSACTION_NOT_FOUND("The transaction cannot be null."),
+  TRANSACTION_TYPE_NULL_OR_EMPTY("The transaction cannot be null or empty."),
   PARENT_ID_NOT_FOUND("The parent id does not belong to a transaction.");
 
   /** The errorMessage explaining this code, never null. **/
@@ -32,13 +34,4 @@ public enum ErrorCode {
     return errorMessage;
   }
 
-  /**
-   * Retrieves the <code>Key</code> that represents <code>this
-   * ErrorCode</code>. This key is the <code>ErrorCode.name()</code> as
-   * lowercase snakecase.
-   * @return A String representing this ErrorCode key, never null.
-   */
-  public String getKey() {
-    return this.name().toLowerCase(Locale.ROOT);
-  }
 }

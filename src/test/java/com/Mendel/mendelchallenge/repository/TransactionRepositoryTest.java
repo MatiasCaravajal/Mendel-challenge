@@ -17,7 +17,7 @@ import org.junit.rules.ExpectedException;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-public class repositoryTest {
+public class TransactionRepositoryTest {
 
     TransactionRepository target = new TransactionRepositoryImp();
 
@@ -35,7 +35,7 @@ public class repositoryTest {
         when(mockTransaction.getId()).thenReturn(id);
         when(mockTransaction.getType()).thenReturn(type);
         when(mockTransaction.getAmount()).thenReturn(amount);
-        when(mockTransaction.getParent_id()).thenReturn(parentId);
+        when(mockTransaction.getParentId()).thenReturn(parentId);
 
         target.save(mockTransaction);
         Assert.assertTrue(target.getTransactionById(id).isPresent());
@@ -70,45 +70,45 @@ public class repositoryTest {
         double amount = 100;
         Long parentId = 5L;
         exceptionRule.expect(ParentIdNotFoundException.class);
-        exceptionRule.expectMessage(ErrorCode.PARENT_ID_NOT_FOUND.getErrorMessage());
+        exceptionRule.expectMessage(
+          ErrorCode.PARENT_ID_NOT_FOUND.getErrorMessage());
 
         Transaction mockTransaction = mock(Transaction.class);
         when(mockTransaction.getId()).thenReturn(id);
         when(mockTransaction.getType()).thenReturn(type);
         when(mockTransaction.getAmount()).thenReturn(amount);
-        when(mockTransaction.getParent_id()).thenReturn(parentId);
+        when(mockTransaction.getParentId()).thenReturn(parentId);
 
         target.save(mockTransaction);
     }
 
     @Test()
     public void when_getTransactionByParentId_then_success() {
-
+         long id = 1l;
         Transaction tx1 = Transaction.builder()
-          .id(1L)
+          .id(id)
           .type("test")
-          .parent_id(null)
           .build();
         Transaction tx2 = Transaction.builder()
           .id(10L)
           .type("test")
-          .parent_id(1l)
+          .parentId(id)
           .build();
         Transaction tx3 = Transaction.builder()
           .id(15L)
           .type("test")
-          .parent_id(1l)
+          .parentId(id)
           .build();
 
         target.save(tx1);
         target.save(tx2);
         target.save(tx3);
 
-        List<Transaction> result =
-          target.getTransactionsByParentId(tx1.getId());
+        List<Transaction> result = target.getTransactionsByParentId(tx1.getId());
 
         Assert.assertNotNull(result);
         Assert.assertFalse(result.isEmpty());
+        Assert.assertTrue(result.stream().allMatch(x -> x.getParentId().equals(id)));
     }
 
     @Test()
@@ -117,25 +117,24 @@ public class repositoryTest {
         Transaction tx1 = Transaction.builder()
           .id(1L)
           .type("test")
-          .parent_id(null)
+          .parentId(null)
           .build();
         Transaction tx2 = Transaction.builder()
           .id(10L)
           .type("test")
-          .parent_id(null)
+          .parentId(null)
           .build();
         Transaction tx3 = Transaction.builder()
           .id(15L)
           .type("test")
-          .parent_id(null)
+          .parentId(null)
           .build();
 
         target.save(tx1);
         target.save(tx2);
         target.save(tx3);
 
-        List<Transaction> result =
-          target.getTransactionsByParentId(tx1.getId());
+        List<Transaction> result = target.getTransactionsByParentId(tx1.getId());
 
         Assert.assertNotNull(result);
         Assert.assertTrue(result.isEmpty());
@@ -154,7 +153,7 @@ public class repositoryTest {
           .build();
         Transaction tx3 = Transaction.builder()
           .id(15L)
-          .type(type)
+          .type("anotherType")
           .build();
 
         target.save(tx1);
@@ -165,6 +164,6 @@ public class repositoryTest {
           target.getTransactionsByType("test");
 
         Assert.assertNotNull(result);
-        Assert.assertTrue(result.stream().allMatch(x->x.getType().equals(type)));
+        Assert.assertTrue(result.stream().allMatch(x -> x.getType().equals(type)));
     }
 }
