@@ -11,30 +11,21 @@ import lombok.Getter;
  *  api.
  */
 public class TransactionDto {
-    /**
-     * The transaction id, cannot be null.
-     */
-    private Long id;
-    /**
-     * The transaction type, cannot be null or empty.
-     */
-    private String type;
-    /**
-     * The amount cannot be zero.
-     */
-    private double amount;
-    /**
-     * The transaction parent id, might be null
-     */
-    private Long parentId;
-
   /**
-   * Create a Transaction entity.
-   *
-   * @return a Transaction. Cannot be null.
+   * The transaction id, cannot be null.
    */
-  public Transaction create() {
-        return new Transaction(id, type, amount, parentId);
-    }
+  private Long id;
+  /**
+   * The transaction type, cannot be null or empty.
+   */
+  private String type;
+  /**
+   * The amount cannot be zero.
+   */
+  private double amount;
+  /**
+   * The transaction parent id, might be null
+   */
+  private Long parentId;
 
 }

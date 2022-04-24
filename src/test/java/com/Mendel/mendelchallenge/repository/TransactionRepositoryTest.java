@@ -88,17 +88,22 @@ public class TransactionRepositoryTest {
         Transaction tx1 = Transaction.builder()
           .id(id)
           .type("test")
+          .amount(500)
           .build();
         Transaction tx2 = Transaction.builder()
           .id(10L)
           .type("test")
+          .amount(500)
           .parentId(id)
           .build();
         Transaction tx3 = Transaction.builder()
           .id(15L)
           .type("test")
+          .amount(500)
           .parentId(id)
           .build();
+
+
 
         target.save(tx1);
         target.save(tx2);
@@ -117,16 +122,19 @@ public class TransactionRepositoryTest {
         Transaction tx1 = Transaction.builder()
           .id(1L)
           .type("test")
+          .amount(100)
           .parentId(null)
           .build();
         Transaction tx2 = Transaction.builder()
           .id(10L)
           .type("test")
+          .amount(100)
           .parentId(null)
           .build();
         Transaction tx3 = Transaction.builder()
           .id(15L)
           .type("test")
+          .amount(100)
           .parentId(null)
           .build();
 
@@ -146,14 +154,17 @@ public class TransactionRepositoryTest {
         Transaction tx1 = Transaction.builder()
           .id(1L)
           .type(type)
+          .amount(100)
           .build();
         Transaction tx2 = Transaction.builder()
           .id(10L)
           .type(type)
+          .amount(100)
           .build();
         Transaction tx3 = Transaction.builder()
           .id(15L)
           .type("anotherType")
+          .amount(100)
           .build();
 
         target.save(tx1);
