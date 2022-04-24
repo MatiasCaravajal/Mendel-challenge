@@ -45,7 +45,7 @@ public class TransactionRepositoryImp implements TransactionRepository {
     Assert.notNull(theId, ErrorCode.TRANSACTION_ID_NULL.getErrorMessage());
 
     return transactions.stream()
-            .filter(x -> x.getId() == theId)
+            .filter(x -> x.getId().equals(theId))
             .findFirst();
   }
 
@@ -56,7 +56,7 @@ public class TransactionRepositoryImp implements TransactionRepository {
   public List<Transaction> getTransactionsByParentId(final Long theId) {
     Assert.notNull(theId, ErrorCode.TRANSACTION_ID_NULL.getErrorMessage());
     return transactions.stream()
-            .filter(x -> x.getParentId() == theId)
+            .filter(x -> theId.equals(x.getParentId()))
             .collect(Collectors.toList());
   }
 

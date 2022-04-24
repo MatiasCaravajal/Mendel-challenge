@@ -7,7 +7,7 @@ public enum ErrorCode {
 
   TRANSACTION_ID_NULL("The transaction id cannot be null."),
   TRANSACTION_NULL("The transaction cannot be null."),
-  TRANSACTION_NOT_FOUND("The transaction cannot be null."),
+  TRANSACTION_NOT_FOUND("The transaction not found."),
   TRANSACTION_TYPE_NULL_OR_EMPTY("The transaction cannot be null or empty."),
   PARENT_ID_NOT_FOUND("The parent id does not belong to a transaction."),
   TRANSACTION_ALREADY_EXIST("The transaction already exists for the specified id."),
