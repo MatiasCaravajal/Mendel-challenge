@@ -25,14 +25,17 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -65,10 +68,10 @@ public class TransactionControllerTest {
 
     String responseBody = mvcResult.getResponse().getContentAsString();
 
-    Map<String, String> expecctedOutput = new HashMap<>();
-    expecctedOutput.put("status","ok");
+    Map<String, String> expectedOutput = new HashMap<>();
+    expectedOutput.put("status","ok");
 
-    Assert.assertTrue(responseBody.equalsIgnoreCase(objectMapper.writeValueAsString(expecctedOutput)));
+    Assert.assertTrue(responseBody.equalsIgnoreCase(objectMapper.writeValueAsString(expectedOutput)));
 
     verify(transactionRepository, times(1)).save(any(Transaction.class));
   }
@@ -119,5 +122,98 @@ public class TransactionControllerTest {
 
     Assert.assertTrue(responseBody.equalsIgnoreCase(objectMapper.writeValueAsString(expectedError)));
     verify(transactionRepository, times(0)).save(any(Transaction.class));
+  }
+
+  @Test
+  public void when_getTransactionIdsByType_then_returnList() throws Exception {
+    ObjectMapper objectMapper = new ObjectMapper();
+     String type = "test";
+    Transaction tx1 = Transaction.builder()
+            .id(9l)
+            .type(type)
+            .amount(100)
+            .build();
+    Transaction tx2 = Transaction.builder()
+            .id(20l)
+            .type(type)
+            .amount(100)
+            .build();
+
+    when(transactionRepository.getTransactionsByType("test")).thenReturn(List.of(tx1, tx2));
+    MvcResult mvcResult = mvc.perform(get("/transactions/types/{type}",type)
+            .contentType("application/json"))
+            .andExpect(status().isOk())
+            .andReturn();
+
+    String responseBody = mvcResult.getResponse().getContentAsString();
+    List<Long> expectedOutput = List.of(tx1.getId(), tx2.getId());
+
+    Assert.assertTrue(responseBody.equalsIgnoreCase(objectMapper.writeValueAsString(expectedOutput)));
+    verify(transactionRepository, times(1)).getTransactionsByType(type);
+  }
+
+  @Test
+  public void when_getSumRelatedTransactions_then_returnDouble() throws Exception {
+    ObjectMapper objectMapper = new ObjectMapper();
+    long id = 1l;
+    Transaction tx1 = Transaction.builder()
+            .id(id)
+            .type("test")
+            .amount(1000)
+            .parentId(null)
+            .build();
+    Transaction tx2 = Transaction.builder()
+            .id(id)
+            .type("test")
+            .amount(8000)
+            .parentId(id)
+            .build();
+    Transaction tx3 = Transaction.builder()
+            .id(id)
+            .type("test")
+            .amount(1000)
+            .parentId(id)
+            .build();
+    when(transactionRepository.getTransactionById(id)).thenReturn(Optional.of(tx1));
+    when(transactionRepository.getTransactionsByParentId(id)).thenReturn(List.of(tx1, tx2));
+
+    MvcResult mvcResult = mvc.perform(get("/transactions/sum/{transactionId}", id))
+            .andExpect(status().isOk())
+            .andReturn();
+
+    String responseBody = mvcResult.getResponse().getContentAsString();
+    Map<String, Double> expectedOutput = new HashMap<>();
+    expectedOutput.put("sum", tx1.getAmount() + tx2.getAmount() + tx3.getAmount());
+
+    Assert.assertTrue(responseBody.equalsIgnoreCase(objectMapper.writeValueAsString(expectedOutput)));
+    verify(transactionRepository, times(1)).getTransactionsByParentId(id);
+    verify(transactionRepository, times(1)).getTransactionById(id);
+  }
+
+  @Test
+  public void when_getSumWithoutRelatedTransaction_then_returnDouble() throws Exception {
+    ObjectMapper objectMapper = new ObjectMapper();
+    long id = 1l;
+    Transaction tx1 = Transaction.builder()
+            .id(id)
+            .type("test")
+            .amount(1000)
+            .parentId(null)
+            .build();
+
+    when(transactionRepository.getTransactionById(id)).thenReturn(Optional.of(tx1));
+    when(transactionRepository.getTransactionsByParentId(id)).thenReturn(List.of());
+
+    MvcResult mvcResult = mvc.perform(get("/transactions/sum/{transactionId}", id))
+            .andExpect(status().isOk())
+            .andReturn();
+
+    String responseBody = mvcResult.getResponse().getContentAsString();
+    Map<String, Double> expectedOutput = new HashMap<>();
+    expectedOutput.put("sum", tx1.getAmount());
+
+    Assert.assertTrue(responseBody.equalsIgnoreCase(objectMapper.writeValueAsString(expectedOutput)));
+    verify(transactionRepository, times(1)).getTransactionsByParentId(id);
+    verify(transactionRepository, times(1)).getTransactionById(id);
   }
 }

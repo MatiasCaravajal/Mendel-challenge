@@ -11,6 +11,7 @@ import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -37,7 +38,37 @@ public class TransactionController {
       return new ResponseEntity<>(new ErrorResponseDto(ex.getMessage(), HttpStatus.BAD_REQUEST.value()), HttpStatus.BAD_REQUEST);
     }
     response = new HashMap<>();
-    response.put("status","ok");
+    response.put("status", "ok");
+    return new ResponseEntity<>(response, HttpStatus.OK);
+  }
+
+  @GetMapping("/types/{type}")
+  public ResponseEntity<Object> getTransactionIdsByType(@PathVariable final String type) {
+
+    List<Long> transactionIds;
+    try {
+       transactionIds = transactionService.getTransactionIdsByType(type);
+
+    } catch (Exception ex) {
+      return new ResponseEntity<>(new ErrorResponseDto(ex.getMessage(), HttpStatus.BAD_REQUEST.value()), HttpStatus.BAD_REQUEST);
+    }
+
+    return new ResponseEntity<>(transactionIds, HttpStatus.OK);
+  }
+
+  @GetMapping("/sum/{transactionId}")
+  public ResponseEntity<Object> getSumRelatedTransactions(@PathVariable final long transactionId) {
+
+    double sum;
+    Map<String, Double> response;
+    try {
+      sum = transactionService.getSumRelatedTransactions(transactionId);
+
+    } catch (Exception ex) {
+      return new ResponseEntity<>(new ErrorResponseDto(ex.getMessage(), HttpStatus.BAD_REQUEST.value()), HttpStatus.BAD_REQUEST);
+    }
+    response = new HashMap<>();
+    response.put("sum", sum);
     return new ResponseEntity<>(response, HttpStatus.OK);
   }
 }

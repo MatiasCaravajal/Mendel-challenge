@@ -83,7 +83,6 @@ public class TransactionRepositoryTest {
     exceptionRule.expectMessage(
             ErrorCode.TRANSACTION_ALREADY_EXIST.getErrorMessage());
 
-
     target.save(tx1);
     target.save(tx2);
   }
