@@ -2,6 +2,7 @@ package com.mendel.mendelchallenge.service;
 
 import com.mendel.mendelchallenge.domain.ErrorCode;
 import com.mendel.mendelchallenge.domain.Transaction;
+import com.mendel.mendelchallenge.exception.ParentIdNotFoundException;
 import com.mendel.mendelchallenge.exception.TransactionNotFoundException;
 import com.mendel.mendelchallenge.repository.TransactionRepositoryImp;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +49,11 @@ public class TransactionService {
     Assert.hasLength(type, ErrorCode.TRANSACTION_TYPE_NULL_OR_EMPTY.getErrorMessage());
     Assert.isTrue(amount != 0, ErrorCode.AMOUNT_CANNOT_BE_ZERO.getErrorMessage());
 
+    if (parentId != null && parentId != 0) {
+      if (!transactionRepository.getTransactionById(parentId).isPresent()) {
+        throw new ParentIdNotFoundException(ErrorCode.PARENT_ID_NOT_FOUND.getErrorMessage());
+      }
+    }
     transactionRepository.save(new Transaction(id, type, amount, parentId));
   }
 

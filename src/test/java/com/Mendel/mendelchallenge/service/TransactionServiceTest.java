@@ -1,10 +1,14 @@
 package com.Mendel.mendelchallenge.service;
 
+import com.mendel.mendelchallenge.domain.ErrorCode;
 import com.mendel.mendelchallenge.domain.Transaction;
+import com.mendel.mendelchallenge.exception.ParentIdNotFoundException;
 import com.mendel.mendelchallenge.repository.TransactionRepositoryImp;
 import com.mendel.mendelchallenge.service.TransactionService;
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
@@ -17,7 +21,8 @@ public class TransactionServiceTest {
   TransactionRepositoryImp repository = mock(TransactionRepositoryImp.class);
   TransactionService target = new TransactionService(repository);
 
-  Transaction entity = mock(Transaction.class);
+  @Rule
+  public ExpectedException exceptionRule = ExpectedException.none();
 
   @Test
   public void when_saveTransaction_then_success() {
@@ -29,6 +34,33 @@ public class TransactionServiceTest {
 
   target.save(id, type, amount, parentId);
     verify(repository, times(1)).save(any());
+  }
+
+  @Test()
+  public void when_notExistRelatedTransaction_then_throwException() {
+    exceptionRule.expect(ParentIdNotFoundException.class);
+    exceptionRule.expectMessage(ErrorCode.PARENT_ID_NOT_FOUND.getErrorMessage());
+
+    Long id = 1l;
+    String type = "test";
+    double amount = 100;
+    Long parentId = 99L;
+
+    target.save(id, type, amount, parentId);
+  }
+
+  @Test()
+  public void when_existRelatedTransaction_then_success() {
+
+    Long id = 1l;
+    String type = "test";
+    double amount = 100;
+    Long parentId = 10l;
+
+    Transaction transaction = mock(Transaction.class);
+    when(repository.getTransactionById(parentId)).thenReturn(Optional.of(transaction));
+    target.save(id, type, amount, parentId);
+    verify(repository, times(1)).save(any(Transaction.class));
   }
 
   @Test
