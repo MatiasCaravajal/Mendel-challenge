@@ -31,7 +31,7 @@ public class Transaction {
     /**
      * The constructor with mandatory parameters.
      *
-     * @param theId the transaction identifier, cannot be null.
+     * @param theId the transaction identifier, must be greater that zero.
      * @param theType the type, cannot be null or empty.
      * @param theAmount the amount, cannot be zero.
      * @param theParentId the parent id, might be null.
@@ -40,10 +40,10 @@ public class Transaction {
                        final String theType,
                        final double theAmount,
                        final Long theParentId) {
-
-        Assert.notNull(theId, "the transaction id cannot be null.");
-        Assert.hasLength(theType, "the type cannot be null or empty.");
-        Assert.isTrue(theAmount != 0, "the amount cannot be zero.");
+        Assert.notNull(theId, ErrorCode.TRANSACTION_ID_NULL.getErrorMessage());
+        Assert.isTrue(theId > 0, ErrorCode.TRANSACTION_ID_MUST_BE_GREATER_THAT_ZERO.getErrorMessage());
+        Assert.hasLength(theType, ErrorCode.TRANSACTION_TYPE_NULL_OR_EMPTY.getErrorMessage());
+        Assert.isTrue(theAmount != 0, ErrorCode.AMOUNT_CANNOT_BE_ZERO.getErrorMessage());
 
         id = theId;
         type = theType;

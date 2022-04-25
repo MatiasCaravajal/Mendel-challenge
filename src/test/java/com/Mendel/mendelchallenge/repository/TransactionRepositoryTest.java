@@ -8,6 +8,7 @@ import java.util.List;
 import com.mendel.mendelchallenge.domain.ErrorCode;
 import com.mendel.mendelchallenge.domain.Transaction;
 import com.mendel.mendelchallenge.exception.ParentIdNotFoundException;
+import com.mendel.mendelchallenge.exception.TransactionAlreadyExistException;
 import com.mendel.mendelchallenge.repository.TransactionRepository;
 import com.mendel.mendelchallenge.repository.TransactionRepositoryImp;
 import org.junit.Assert;
@@ -63,24 +64,28 @@ public class TransactionRepositoryTest {
         target.save(mockTransaction);
     }
 
-    @Test()
-    public void when_saveTransactionWithWrongParentId_then_throwException() {
-        Long id = 1L;
-        String type = "test";
-        double amount = 100;
-        Long parentId = 5L;
-        exceptionRule.expect(ParentIdNotFoundException.class);
-        exceptionRule.expectMessage(
-          ErrorCode.PARENT_ID_NOT_FOUND.getErrorMessage());
+  @Test()
+  public void when_saveTransactionsAlreadyExist_then_throwException() {
+    long id = 1l;
+    Transaction tx1 = Transaction.builder()
+            .id(id)
+            .type("test")
+            .amount(500)
+            .build();
+    Transaction tx2 = Transaction.builder()
+            .id(id)
+            .type("test")
+            .amount(500)
+            .parentId(id)
+            .build();
 
-        Transaction mockTransaction = mock(Transaction.class);
-        when(mockTransaction.getId()).thenReturn(id);
-        when(mockTransaction.getType()).thenReturn(type);
-        when(mockTransaction.getAmount()).thenReturn(amount);
-        when(mockTransaction.getParentId()).thenReturn(parentId);
+    exceptionRule.expect(TransactionAlreadyExistException.class);
+    exceptionRule.expectMessage(
+            ErrorCode.TRANSACTION_ALREADY_EXIST.getErrorMessage());
 
-        target.save(mockTransaction);
-    }
+    target.save(tx1);
+    target.save(tx2);
+  }
 
     @Test()
     public void when_getTransactionByParentId_then_success() {
@@ -88,15 +93,18 @@ public class TransactionRepositoryTest {
         Transaction tx1 = Transaction.builder()
           .id(id)
           .type("test")
+          .amount(500)
           .build();
         Transaction tx2 = Transaction.builder()
           .id(10L)
           .type("test")
+          .amount(500)
           .parentId(id)
           .build();
         Transaction tx3 = Transaction.builder()
           .id(15L)
           .type("test")
+          .amount(500)
           .parentId(id)
           .build();
 
@@ -112,48 +120,22 @@ public class TransactionRepositoryTest {
     }
 
     @Test()
-    public void when_notExistRelatedTransaction_then_returnEmptyList() {
-
-        Transaction tx1 = Transaction.builder()
-          .id(1L)
-          .type("test")
-          .parentId(null)
-          .build();
-        Transaction tx2 = Transaction.builder()
-          .id(10L)
-          .type("test")
-          .parentId(null)
-          .build();
-        Transaction tx3 = Transaction.builder()
-          .id(15L)
-          .type("test")
-          .parentId(null)
-          .build();
-
-        target.save(tx1);
-        target.save(tx2);
-        target.save(tx3);
-
-        List<Transaction> result = target.getTransactionsByParentId(tx1.getId());
-
-        Assert.assertNotNull(result);
-        Assert.assertTrue(result.isEmpty());
-    }
-
-    @Test()
     public void when_getTransactionByType_then_success() {
         String type = "test";
         Transaction tx1 = Transaction.builder()
           .id(1L)
           .type(type)
+          .amount(100)
           .build();
         Transaction tx2 = Transaction.builder()
           .id(10L)
           .type(type)
+          .amount(100)
           .build();
         Transaction tx3 = Transaction.builder()
           .id(15L)
           .type("anotherType")
+          .amount(100)
           .build();
 
         target.save(tx1);
