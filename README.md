@@ -1,9 +1,12 @@
 
 # Mendel-challenge application
 Backend Mendel challenge
-###Tech
+
+### Tech
+
     * Java 11
     * Spring-boot
+    
 ## Install the app
 
     ./mvnw install
