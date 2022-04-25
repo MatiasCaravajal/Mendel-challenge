@@ -59,9 +59,9 @@ The REST API to handle transactions.
 
      {"sum": double}
 
-#Docker Container
+# Docker Container
 
-###Container name
+### Container name
 `matiascaravajal/mendel:v0.0.4`
 
 ### Prerequisities
